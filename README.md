@@ -9,6 +9,8 @@ by torbers
 
 <img width="1203" height="677" alt="image" src="https://github.com/user-attachments/assets/d5c53b74-d712-4e4a-a85f-5e1d9ec36548" />
 
+## NOTE: After changing MIDI channel, ts10 may reset its MIDI connection and you may have to re-select it from MIDI devices in your DAW.
+
 
 
 
