@@ -1,5 +1,6 @@
 # ts10
-Code &amp; hardware for TS10 MIDI controller
+Code & hardware for TS10 MIDI controller
+
 
 License:
 
