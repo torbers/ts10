@@ -1,5 +1,10 @@
-# ts10
-Code & hardware for TS10 MIDI controller
+# ts10 midi controller
+
+by torbers
+[sambkothe.com](sambkothe.com) | [ig](https://www.instagram.com/torbersdog/) | [yt](https://www.youtube.com/@torbersdog)
+
+
+
 
 
 License:
