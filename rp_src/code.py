@@ -44,6 +44,7 @@ OCT  = [36, 24, 12,  0]                                       #
 FULL = [45, 30, 15,  0]                                       #
 INS =  [BASS, GUIT, VIOL, OCT, FULL] # List of tuning options #
 tune = BASS                          # Default tuning         #
+CASIO_COMPATIBILITY_MODE = 0         # for uart compatibility w older Casio keyboards which do not send NoteOn 0x90
 ###############################################################
 
 
@@ -81,10 +82,7 @@ FREEPLAY = 1   # Tap frets to play notes
 PLUCK = 2      # Hold frets & tap strings to play notes
 TSTR = 3       # PLUCK but extra strings are activated & transposed 1 5th and 1 oct above
 CHORD = 4
-ORGAN = 5      # rows of white & black keys, like 2 organ manuals, or a computer keyboard
-
-
-CASIO_COMPATIBILITY_MODE = 1  # for uart compatibility w older Casio keyboards which do not send NoteOn 0x90
+ORGAN = 5      # rows of white & black keys, like 2 organ manuals, or a computer keyboar
 
 
 modes = [SET, FREEPLAY, PLUCK, TSTR, CHORD, ORGAN]
