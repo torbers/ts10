@@ -44,7 +44,6 @@ OCT  = [36, 24, 12,  0]                                       #
 FULL = [45, 30, 15,  0]                                       #
 INS =  [BASS, GUIT, VIOL, OCT, FULL] # List of tuning options #
 tune = BASS                          # Default tuning         #
-CASIO_COMPATIBILITY_MODE = 0         # for uart compatibility w older Casio keyboards which do not send NoteOn 0x90
 ###############################################################
 
 
@@ -73,6 +72,7 @@ organ_tune = BIMANUAL                                         #
 transpose = 36                                                #
 velocity = 127                                                #
 midi_channel = 1                                              #
+CASIO_COMPATIBILITY_MODE = 0  # for uart compatibility w older Casio keyboards which do not send NoteOn 0x90
 ###############################################################
 
 
@@ -82,7 +82,7 @@ FREEPLAY = 1   # Tap frets to play notes
 PLUCK = 2      # Hold frets & tap strings to play notes
 TSTR = 3       # PLUCK but extra strings are activated & transposed 1 5th and 1 oct above
 CHORD = 4
-ORGAN = 5      # rows of white & black keys, like 2 organ manuals, or a computer keyboar
+ORGAN = 5      # rows of white & black keys, like 2 organ manuals, or a computer keyboard
 
 
 modes = [SET, FREEPLAY, PLUCK, TSTR, CHORD, ORGAN]
@@ -423,7 +423,11 @@ while True:
             if umsg is not None:
                 data_list = list(umsg)
                 print(data_list)
-                midi.send(NoteOn(data_list[0], velocity=data_list[1]))
+                try:
+                    if ((data_list[0] < 128) and (data_list[1] < 128)):
+                        midi.send(NoteOn(data_list[0], velocity=data_list[1]))
+                except IndexError as e:
+                    print("IndexError: " + str(e))
 
     except TypeError as e:
         print("TypeError: " + str(e))
