@@ -1,7 +1,7 @@
 # ts10 midi controller
 
 by torbers
-[sambkothe.com](sambkothe.com) | [ig](https://www.instagram.com/torbersdog/) | [yt](https://www.youtube.com/@torbersdog)
+[sambkothe.com](sambkothe.com) | [ig](https://www.instagram.com/sambkothe/) | [yt](https://www.youtube.com/@torbersdog)
 
 [<img width="1205" height="678" alt="image" src="https://github.com/user-attachments/assets/4708393b-f708-4a63-a051-dfa22a8d6fab" />](https://learn.adafruit.com/welcome-to-circuitpython/installing-mu-editor)
 
