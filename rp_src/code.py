@@ -15,6 +15,7 @@ from adafruit_midi.note_on          import NoteOn
 from adafruit_midi.note_off         import NoteOff
 from adafruit_midi.control_change   import ControlChange
 from adafruit_midi.pitch_bend       import PitchBend
+from adafruit_midi.midi_message     import MIDIUnknownEvent
 
 
 '''
@@ -32,7 +33,7 @@ TODO
 
 
 # Set tuning options in freeplay (chromatic) mode
-# bass is EADG, guitar (bottom 4 strings) is DGBE, violin is   
+# bass is EADG, guitar (bottom 4 strings) is DGBE, violin is
 # CDAE, etc. OCT has each string begin one octave up from the
 # next, FULL assigns each pad a unique note.
 ###############################################################
@@ -82,6 +83,10 @@ TSTR = 3       # PLUCK but extra strings are activated & transposed 1 5th and 1 
 CHORD = 4
 ORGAN = 5      # rows of white & black keys, like 2 organ manuals, or a computer keyboard
 
+
+CASIO_COMPATIBILITY_MODE = 1  # for uart compatibility w older Casio keyboards which do not send NoteOn 0x90
+
+
 modes = [SET, FREEPLAY, PLUCK, TSTR, CHORD, ORGAN]
 
 mode = FREEPLAY
@@ -121,7 +126,7 @@ con_pin.pull = Pull.UP
 
 # Create MIDI IO
 
-uart = busio.UART(board.GP0, board.GP1, baudrate=31250, timeout=0.001)
+uart = busio.UART(board.GP0, board.GP1, baudrate=31250, timeout=0.001, bits=8)
 
 midi = adafruit_midi.MIDI(
                             midi_out=usb_midi.ports[1],
@@ -134,9 +139,8 @@ midi = adafruit_midi.MIDI(
 hmidi = adafruit_midi.MIDI(
                             midi_in=uart,
                             midi_out=uart,
-                            in_channel=(midi_channel - 1),
                             out_channel=(midi_channel - 1),
-                            debug=False,
+                            debug=True,
                             )
 
 
@@ -236,8 +240,8 @@ def onAction(fret, status):
         else:
             midi.send(NoteOff(fretToNote(f), velocity))
             hmidi.send(NoteOff(fretToNote(f), velocity))
-            
-    
+
+
     elif mode == ORGAN:
         if fret[0] == 5:
             return
@@ -250,7 +254,7 @@ def onAction(fret, status):
         else:
             midi.send(NoteOff(fretToNote(f), velocity))
             hmidi.send(NoteOff(fretToNote(f), velocity))
-            
+
 
     elif mode == PLUCK: # this is FUCKIGN INSANE and needs to be completely replaced (all notes turn off when one turns off)
         if fret[0] < 5:
@@ -344,7 +348,7 @@ def onAction(fret, status):
                     mode = f[1] + 1
                     new_mode = mode
                     print(mode)
-                                
+
                 elif f[1] == 13:             # select MIDI channel to output to
                     midi_channel -= 1        # & display in binary on LEDs
                     if midi_channel < 1:
@@ -352,13 +356,13 @@ def onAction(fret, status):
                     elif midi_channel > 16:
                         midi_channel = 16
                     print(midi_channel)
-                    
+
                     for p in range(4):
                         pixels[p] = [int(list(decimal_to_binary(midi_channel, 4))[p]) * v for v in wheel(midi_channel * p / 60 * 255)]
-                    
+
                     hmidi.out_channel = midi_channel - 1
                     midi.out_channel = midi_channel - 1
-                        
+
                 elif f[1] == 14:
                     midi_channel += 1
                     if midi_channel < 1:
@@ -366,14 +370,14 @@ def onAction(fret, status):
                     elif midi_channel > 16:
                         midi_channel = 16
                     print(midi_channel)
-                    
+
                     for p in range(4):
                         pixels[p] = [int(list(decimal_to_binary(midi_channel, 4))[p]) * v for v in wheel(midi_channel * p / 60 * 255)]
-                    
+
                     hmidi.out_channel = midi_channel - 1
                     midi.out_channel = midi_channel - 1
-                    
-                
+
+
 
 
 # Main loop
@@ -388,7 +392,7 @@ def decimal_to_binary(n, l):
         n //= 2
     binary_string = (l - len(binary_string)) * "0" + binary_string
     return binary_string[-l:]
-    
+
 
 while True:
     # Reset changed sensors
@@ -408,20 +412,31 @@ while True:
             print("usb midi recieved: ")
             print(msg)
             hmidi.send(msg)
+        
+        if not CASIO_COMPATIBILITY_MODE:
+            hmsg = hmidi.receive()
+            if hmsg is not None:
+                print("uart midi recieved:")
+                midi.send(hmsg)
+                hmidi.send(hmsg)
+                
+        else:
+            umsg = uart.read(2)
+            if umsg is not None:
+                data_list = list(umsg)
+                print(data_list)
+                midi.send(NoteOn(data_list[0], velocity=data_list[1]))
 
-        msg = hmidi.receive()
-        if msg is not None:
-            print("uart midi recieved:")
-            midi.send(msg)
-            hmidi.send(msg)
-
-    except TypeError:
-        print("te")
+    except TypeError as e:
+        print("TypeError: " + str(e))
 
 
     # Update touch sensors & trigger if pressed
     for s in range(len(sensors)):
-        currentTouched[s] = sensors[s].touched_pins
+        try:
+            currentTouched[s] = sensors[s].touched_pins
+        except OSError:
+            pass
         for f in range(len(currentTouched[s])):
             if currentTouched[s][f] != oldTouched[s][f]:
                 try:
